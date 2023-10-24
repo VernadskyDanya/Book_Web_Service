@@ -8,7 +8,6 @@ class DbConfig:
     DB_HOST = env.str("DB_HOST", default="localhost")
     DB_PORT = env.str("DB_PORT", default="5432")
     DB_SCHEMA = env.str("DB_SCHEMA", default="public")
-    PATH_TO_MIGRATIONS = "migrations"
 
     SERVICE_CONNECTION_SETTINGS = {
         "dsn": (
