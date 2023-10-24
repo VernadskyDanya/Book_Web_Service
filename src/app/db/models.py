@@ -17,4 +17,5 @@ class Book(Base):
     genre: Mapped[int] = mapped_column(String(30))  # TODO: (one-to-one), table of genres
 
     def __repr__(self) -> str:
-        return f"Book(id={self.id!r}, name={self.name!r}, date_published={self.date_published!r})"
+        fields = tuple("{}={}".format(k, v) for k, v in self.__dict__.items())
+        return str(tuple(sorted(fields))).replace("\'", "")
