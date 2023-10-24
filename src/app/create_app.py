@@ -6,7 +6,7 @@ from app.middlewares.error import error_handler
 from app.routes import routes
 from app.settings.app import AppConfig
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.settings.db import DbConfig
 
