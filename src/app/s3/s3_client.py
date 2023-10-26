@@ -3,8 +3,8 @@ from typing import Final
 
 from minio import Minio
 
-
 from app.settings.s3 import S3Config
+
 
 _minio_config = S3Config()
 
@@ -21,7 +21,7 @@ def check_minio_readiness() -> bool:
     """Try to list buckets to check if MinIO is ready."""
     try:
         minio_client.list_buckets()
-        return True
     except Exception as err:
         logging.error(f"MinIO is not ready: {err}")
         return False
+    return True

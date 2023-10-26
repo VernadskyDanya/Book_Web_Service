@@ -1,12 +1,10 @@
-from aiohttp import web
+from aiohttp import web, web_request
+from aiohttp_pydantic import PydanticView
+from aiohttp_pydantic.oas.typing import r200, r503
 from pydantic import BaseModel
 
 from app.db.crud import check_database_connection
-
-from aiohttp_pydantic import PydanticView
-from aiohttp_pydantic.oas.typing import r200, r503
-
-from app.s3_storage.s3_client import check_minio_readiness
+from app.s3.s3_client import check_minio_readiness
 
 
 class Readiness(BaseModel):
@@ -43,6 +41,5 @@ class ReadinessView(PydanticView):
         return web.json_response(readiness_obj.model_dump(), status=200 if server_status else 503)
 
 
-async def liveness(request) -> web.Response:
+async def liveness(request: web_request.Request) -> web.Response:
     return web.Response(text="Server is alive!", status=200)
-

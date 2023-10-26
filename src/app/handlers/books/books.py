@@ -1,3 +1,5 @@
+import typing
+
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
 from aiohttp_pydantic.oas.typing import r200, r201, r404
@@ -24,7 +26,7 @@ class Error(BaseModel):
     error: str
 
 
-def _build_conditions(**kwargs) -> list:
+def _build_conditions(**kwargs: typing.Any) -> list:
     """Build SQL conditions for a query."""
     conditions = []
     for key, value in kwargs.items():
@@ -35,9 +37,9 @@ def _build_conditions(**kwargs) -> list:
 
 class BookView(PydanticView):
 
-    async def get(
+    async def get(  # noqa: WPS211 (needed for support swagger)
             self,
-            id: int | None = None,
+            id: int | None = None,  # noqa: WPS125
             name: str | None = None,
             author: str | None = None,
             date_published: str | None = None,

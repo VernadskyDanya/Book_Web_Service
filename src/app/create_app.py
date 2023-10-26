@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.middlewares.error import error_handler
 from app.routes import routes
-from app.s3_storage.s3_client import minio_client, bucket_name
+from app.s3.s3_client import bucket_name, minio_client
 from app.settings.app import AppConfig
 from app.settings.db import DbConfig
 
