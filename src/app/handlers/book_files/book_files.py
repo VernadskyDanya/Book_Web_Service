@@ -46,7 +46,7 @@ async def handle_download(request: web_request.Request) -> web.Response:
         body = read_file(request.app["s3"], request.app["s3_bucket_name"], file_id)
     except S3Error as err:
         return web.Response(status=404, text=f'Failed to retrieve file with ID {file_id}: {err}')
-    response = web.Response(body=body)
+    response = web.Response(status=200, body=body)
     response.content_type = 'application/octet-stream'
     return response
 

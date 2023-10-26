@@ -18,6 +18,12 @@ class DBMigrator:
         self.alembic_cfg = Config(self._find_path(os.getcwd(), "alembic.ini"))
         self.alembic_cfg.set_main_option("sqlalchemy.url", DbConfig.SERVICE_CONNECTION_SETTINGS["dsn"])
 
+        current_path = os.getcwd()  # Get the current working directory
+        if os.path.basename(current_path) == "src":  # if current folder is '/src'
+            self.alembic_cfg.set_main_option("script_location", "alembic_migrations")
+        else:
+            self.alembic_cfg.set_main_option("script_location", "src/alembic_migrations")
+
     def start_migrate(self):
         self._create_database(DbConfig.SERVICE_CONNECTION_SETTINGS["dsn"].replace("+asyncpg", ""))
         command.upgrade(self.alembic_cfg, "head")
