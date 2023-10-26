@@ -6,6 +6,7 @@ from app.create_app import create_app
 from app.handlers.books.books import Book
 from app.routes import API_V1_ROOT
 
+
 logging.basicConfig(level=logging.DEBUG)
 
 # For some reason this fixture doesn't work well

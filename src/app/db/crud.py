@@ -1,12 +1,12 @@
 import logging
 
-from aiohttp.abc import Application
+from sqlalchemy.ext.asyncio import AsyncEngine
 from sqlalchemy.sql import text
 
 
-async def check_database_connection(app: Application) -> bool:
+async def check_database_connection(engine: AsyncEngine) -> bool:
     try:
-        async with app['db'].connect() as conn:
+        async with engine.connect() as conn:
             statement = text('SELECT 1')
             await conn.execute(statement)
             return True

@@ -11,7 +11,7 @@ class DbConfig:
 
     SERVICE_CONNECTION_SETTINGS = {
         "dsn": (
-            f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"  # NOQA: E501
+            f"postgresql+asyncpg://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}"  # NOQA: E501, WPS221
         ),
         "min_size": env.int(
             "DB_SERVICE_POOL_MIN_SIZE",
@@ -26,4 +26,3 @@ class DbConfig:
             default=60,
         ),
     }
-

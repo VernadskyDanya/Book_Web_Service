@@ -11,9 +11,7 @@ from app.settings.app import AppConfig
 def cli() -> None:
     """Init event loop, logging config etc."""
     # TODO: setup Sentry
-
     # TODO: setup logging
-    pass
 
 
 @cli.command(short_help="start app")

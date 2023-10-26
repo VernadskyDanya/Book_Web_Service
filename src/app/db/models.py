@@ -3,7 +3,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
-    pass
+    """Base class for ORM."""
 
 
 class Book(Base):
@@ -15,5 +15,5 @@ class Book(Base):
     genre: Mapped[int] = mapped_column(String(30))  # TODO: (one-to-one), table of genres
 
     def __repr__(self) -> str:
-        fields = tuple("{}={}".format(k, v) for k, v in self.__dict__.items())
+        fields = tuple("{k}={v}".format(k=k, v=v) for k, v in self.__dict__.items())  # noqa: WPS221, WPS111
         return str(tuple(sorted(fields))).replace("\'", "")

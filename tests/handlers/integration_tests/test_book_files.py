@@ -6,6 +6,7 @@ from app.create_app import create_app
 from app.handlers.books.books import Book
 from app.routes import API_V1_ROOT
 
+
 logging.basicConfig(level=logging.DEBUG)
 
 
@@ -17,7 +18,7 @@ def book_json_data() -> dict:
 class TestBookFiles:
 
     def test_insert_file(self):
-
+        pass
 
     def test_read_file(self):
         book = Book(**book_json_data)
