@@ -1,6 +1,7 @@
-from pydantic.v1 import BaseSettings
-from minio import Minio
 from typing import Final
+
+from minio import Minio
+from pydantic.v1 import BaseSettings
 
 
 class S3Config(BaseSettings):

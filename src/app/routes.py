@@ -1,10 +1,10 @@
 from aiohttp import web
-from aiohttp.hdrs import METH_GET as GET, METH_POST as POST
+from aiohttp.hdrs import METH_GET as GET
+from aiohttp.hdrs import METH_POST as POST
 
 from app.handlers.book_files import book_files
-from app.handlers.default.methods import liveness, readiness
-
 from app.handlers.books.books import BookView
+from app.handlers.default.methods import liveness, readiness
 
 API_V1_ROOT = "/api/v1/{}"  # noqa: P103
 

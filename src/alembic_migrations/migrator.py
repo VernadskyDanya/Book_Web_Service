@@ -3,7 +3,6 @@ import os
 
 from alembic import command
 from alembic.config import Config
-
 from sqlalchemy_utils.functions import create_database, database_exists
 
 from app.settings.db import DbConfig
