@@ -26,6 +26,15 @@ class Error(BaseModel):
     error: str
 
 
+def _build_conditions(**kwargs) -> List:
+    """Build SQL conditions for a query."""
+    conditions = []
+    for key, value in kwargs.items():
+        if value is not None:
+            conditions.append(getattr(BookSQL, key) == value)
+    return conditions
+
+
 class BookView(PydanticView):
 
     async def get(
@@ -44,24 +53,15 @@ class BookView(PydanticView):
             200: Successful operation
             404: Book not found
         """
-        conditions = []
-        if id:
-            conditions.append(BookSQL.id == id)
-        if name:
-            conditions.append(BookSQL.name == name)
-        if author:
-            conditions.append(BookSQL.author == author)
-        if date_published:
-            conditions.append(BookSQL.date_published == date_published)
-        if genre:
-            conditions.append(BookSQL.genre == genre)
+        conditions = _build_conditions(id=id, name=name, author=author, date_published=date_published, genre=genre)
 
         async with AsyncSession(self.request.app["db"]) as session:
             stmt = select(BookSQL).where(*conditions)
             result = await session.execute(stmt)
-            retrieved_book = result.scalars().all()
-            print(retrieved_book)
-        return web.json_response([Book.model_validate(b.__dict__).model_dump_json() for b in retrieved_book])
+            retrieved_books = result.scalars().all()
+            if not retrieved_books:
+                return web.json_response({"error": "Books not found"}, status=404)
+        return web.json_response([Book.model_validate(b.__dict__).model_dump_json() for b in retrieved_books])
 
     async def post(self, book: Book) -> r201:
         """

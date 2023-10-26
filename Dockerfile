@@ -12,7 +12,10 @@ ENV TZ=Europe/Latvia
 # Update and install system deps
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-        curl && \
+        curl \
+        libpq-dev \
+        python3-dev \
+        gcc && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* && \
     pip install poetry==1.6.1
