@@ -53,6 +53,16 @@ class BookView(PydanticView):
             200: Successful operation
             404: Book not found
         """
+        # Validate query-args
+        valid_keys = Book.model_fields.keys()
+        query_parameters = self.request.rel_url.query
+        for key in query_parameters.keys():
+            if key not in valid_keys:
+                return web.json_response(
+                    Error(error=f"Invalid query parameter key '{key}'").model_dump_json(),
+                    status=400,
+                )
+
         conditions = _build_conditions(id=id, name=name, author=author, date_published=date_published, genre=genre)
 
         async with AsyncSession(self.request.app["db"]) as session:
