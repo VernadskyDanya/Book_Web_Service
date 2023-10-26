@@ -25,4 +25,7 @@ jobs:
       run: poetry install
         
     - name: Analysing the code with flake8
-      run: poetry run flake8 --config=setup.cfg
+      run: |
+        ls
+        pwd
+        poetry run flake8 --config=setup.cfg
