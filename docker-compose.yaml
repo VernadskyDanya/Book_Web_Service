@@ -12,8 +12,10 @@ services:
       - environment/local.env
     depends_on:
       - db
+      - minio
     environment:
       DB_HOST: db
+      S3_HOST: minio
   db:
     image: postgres:15
     ports:
