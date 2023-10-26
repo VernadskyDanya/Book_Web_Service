@@ -26,5 +26,5 @@ jobs:
         
     - name: Analysing the code with flake8
       run: |
-        poetry run flake8 --config ./setup.cfg
+        # poetry run flake8 --config ./setup.cfg
         poetry run flake8 --config setup.cfg
