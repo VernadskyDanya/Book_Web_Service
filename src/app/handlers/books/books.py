@@ -2,8 +2,8 @@ from typing import List, Optional
 
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
-from pydantic import BaseModel
 from aiohttp_pydantic.oas.typing import r200, r201, r404
+from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 

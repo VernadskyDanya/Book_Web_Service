@@ -1,15 +1,13 @@
 from logging import getLogger
 
 from aiohttp.web import Application
+from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.middlewares.error import error_handler
 from app.routes import routes
 from app.settings.app import AppConfig
-
-from sqlalchemy.ext.asyncio import create_async_engine
-
 from app.settings.db import DbConfig
-from app.settings.s3 import minio_client, bucket_name
+from app.settings.s3 import bucket_name, minio_client
 
 logger = getLogger(__name__)
 

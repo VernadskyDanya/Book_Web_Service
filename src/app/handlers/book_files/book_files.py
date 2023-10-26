@@ -2,7 +2,6 @@ import logging
 from io import BytesIO
 
 from aiohttp import web
-
 from minio.error import S3Error
 
 

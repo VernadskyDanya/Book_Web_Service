@@ -3,9 +3,7 @@ from aiohttp import web
 from aiohttp_pydantic import oas
 
 from alembic_migrations.migrator import DBMigrator
-
 from app.create_app import create_app
-
 from app.settings.app import AppConfig
 
 
