@@ -3,6 +3,7 @@ import typing
 from aiohttp import web
 from aiohttp_pydantic import PydanticView
 from aiohttp_pydantic.oas.typing import r200, r201, r404
+from multidict import MultiDict
 from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,6 +36,14 @@ def _build_conditions(**kwargs: typing.Any) -> list:
     return conditions
 
 
+def _validate_query_arg_get_book(query_parameters: MultiDict[str]) -> str:
+    valid_keys = Book.model_fields.keys()
+    for key in query_parameters.keys():
+        if key not in valid_keys:
+            return key
+    return ""
+
+
 class BookView(PydanticView):
 
     async def get(  # noqa: WPS211 (needed for support swagger)
@@ -53,22 +62,18 @@ class BookView(PydanticView):
             200: Successful operation
             404: Book not found
         """
-        # Validate query-args
-        valid_keys = Book.model_fields.keys()
-        query_parameters = self.request.rel_url.query
-        for key in query_parameters.keys():
-            if key not in valid_keys:
-                return web.json_response(
-                    Error(error=f"Invalid query parameter key '{key}'").model_dump_json(),
-                    status=400,
-                )
+        invalid_key: str = _validate_query_arg_get_book(self.request.rel_url.query)
+        if invalid_key:
+            return web.json_response(
+                Error(error=f"Invalid query parameter key '{invalid_key}'").model_dump_json(),
+                status=400,
+            )
 
         conditions = _build_conditions(id=id, name=name, author=author, date_published=date_published, genre=genre)
 
         async with AsyncSession(self.request.app["db"]) as session:
             stmt = select(BookSQL).where(*conditions)
-            result = await session.execute(stmt)
-            retrieved_books = result.scalars().all()
+            retrieved_books = (await session.execute(stmt)).scalars().all()
             if not retrieved_books:
                 return web.json_response({"error": "Books not found"}, status=404)
         return web.json_response([Book.model_validate(book.__dict__).model_dump_json() for book in retrieved_books])
