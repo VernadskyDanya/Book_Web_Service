@@ -17,7 +17,7 @@ class Book(BaseModel):
     name: str
     author: str
     date_published: str  # TODO: change to date type or add validation
-    genre: str
+    genre: str | None = None
 
     class Config:
         from_attributes = True
@@ -25,6 +25,10 @@ class Book(BaseModel):
 
 class Error(BaseModel):
     error: str
+
+
+class BookKeyError(Exception):
+    """Error for keys that are not valid."""
 
 
 def _build_conditions(**kwargs: typing.Any) -> list:
@@ -36,12 +40,10 @@ def _build_conditions(**kwargs: typing.Any) -> list:
     return conditions
 
 
-def _validate_query_arg_get_book(query_parameters: MultiDict[str]) -> str:
-    valid_keys = Book.model_fields.keys()
-    for key in query_parameters.keys():
-        if key not in valid_keys:
-            return key
-    return ""
+def _validate_fields(parameters: dict | MultiDict[str], valid_values: tuple) -> None:
+    for key in parameters.keys():
+        if key not in valid_values:
+            raise BookKeyError(f"{key}")
 
 
 class BookView(PydanticView):
@@ -62,10 +64,11 @@ class BookView(PydanticView):
             200: Successful operation
             404: Book not found
         """
-        invalid_key: str = _validate_query_arg_get_book(self.request.rel_url.query)
-        if invalid_key:
+        try:
+            _validate_fields(self.request.rel_url.query, tuple(Book.__annotations__.keys()))
+        except BookKeyError as key:
             return web.json_response(
-                Error(error=f"Invalid query parameter key '{invalid_key}'").model_dump_json(),
+                Error(error="Invalid query parameter key '{key}'".format(key=str(key))).model_dump_json(),
                 status=400,
             )
 
@@ -86,9 +89,19 @@ class BookView(PydanticView):
         Status Codes:
             201: The book is created
         """
+        try:
+            _validate_fields(await self.request.json(), tuple(Book.__annotations__.keys()))
+        except BookKeyError as key:
+            return web.json_response(
+                Error(error="Invalid body key '{key}'".format(key=str(key))).model_dump_json(),
+                status=400,
+            )
+
         async with AsyncSession(self.request.app["db"]) as session:
             book_instance = BookSQL(**book.model_dump())
             session.add(book_instance)
             await session.commit()
+            await session.refresh(book_instance)
+            book_id = book_instance.id
 
-        return web.Response(status=201)
+        return web.json_response({"message": f"Book with ID {book_id} has been created"}, status=201)
