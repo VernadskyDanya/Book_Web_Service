@@ -28,4 +28,5 @@ jobs:
       run: |
         ls
         pwd
+        cat setup.cfg
         poetry run flake8 --config=setup.cfg
