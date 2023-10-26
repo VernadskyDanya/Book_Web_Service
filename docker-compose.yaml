@@ -1,0 +1,43 @@
+version: '3.8'
+
+
+services:
+  app:
+    build: .
+    volumes:
+      - ./src/:/opt/app
+    ports:
+      - "8080:8080"
+    env_file:
+      - environment/local.env
+    depends_on:
+      - db
+      - minio
+    environment:
+      DB_HOST: db
+      S3_HOST: minio
+  db:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    env_file:
+      - environment/local.env
+    environment:
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+  minio:
+    image: minio/minio:latest
+    container_name: minio-starlab
+    ports:
+      - "9000:9000"
+    command: server /data
+    environment:
+      MINIO_ACCESS_KEY: ACCESS_KEY
+      MINIO_SECRET_KEY: SECRET_KEY
+    volumes:
+      - minio_data:/data
+
+volumes:
+  postgres_data:
+  minio_data:
