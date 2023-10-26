@@ -31,15 +31,6 @@ These instructions will get you a copy of the project up and running on your loc
     python src/manage.py start
    ```
 
-## Running the tests (***experimental!***)
-   **Tests are not ready yet for running in such a way!**
-
-  - Edit environment variables in `tests/conftest.py`
-  - Run tests
-    ```sh
-    pytest .
-    ```
-
 ## Running in Docker
 
 ### Dockerfile
@@ -58,6 +49,22 @@ These instructions will get you a copy of the project up and running on your loc
    docker-compose up
    ```
 
+## Running the tests (***experimental!***)
+   **Tests are not ready yet for running in such a way!**
+
+  - Edit environment variables in `tests/conftest.py`
+  - Run tests
+    ```sh
+    pytest .
+    ```
+
+## TODO
+
+- [ ] Write connection with S3 in async way
+- [ ] Add fixtures for integrity tests
+- [ ] CI/CD. Write a pipeline for automated testing and code quality checks
+- [ ] Set up logging in better way
+
 ## Contributing
 
 Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
@@ -72,9 +79,3 @@ See also the list of [contributors](https://github.com/your/project/contributors
 
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details.
 
-
-## TODO
-
-- [ ] Write connection with S3 in async way
-- [ ] Add fixtures for integrity tests
-- [ ] CI/CD. Write a pipeline for automated testing and code quality checks
