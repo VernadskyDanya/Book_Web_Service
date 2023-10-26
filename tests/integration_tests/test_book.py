@@ -29,16 +29,18 @@ class TestBook:
 
     @pytest.mark.asyncio
     async def test_post_book(self, aiohttp_client: AiohttpClient, book_json_data: dict):
+        # TODO: Add yield fixture for cleaning database after test
         client = await aiohttp_client(create_app())
         resp = await client.post(API_V1_ROOT.format("books"), json=book_json_data)
         assert resp.status == 201
 
-        # # Retrieve books from the table
-        # result = await conn.execute(users.select())
-        # rows = await result.fetchall()
+        # TODO: Add checking database directly for presence of book
 
     @pytest.mark.asyncio
     async def test_get_book(self, aiohttp_client: AiohttpClient):
+        # TODO: Add yield fixture for inserting book and self-cleaning after
         client = await aiohttp_client(create_app())
         resp = await client.get(API_V1_ROOT.format("books"))
         assert resp.status == 200
+
+        # TODO: Add assert for checking valid resp.data
