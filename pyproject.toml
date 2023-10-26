@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "starlab test problem"
-version = "0.0.1"
-description = ""
+name = "Book Web Service"
+version = "0.1.0"
+description = "API service for providing the user with access to various literary works"
 authors = ["d.vernadskii@gmail.com"]
 
 

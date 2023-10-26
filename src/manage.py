@@ -18,7 +18,7 @@ def cli() -> None:
 def start() -> None:
     """Start REST API application."""
     app = create_app()
-    oas.setup(app, url_prefix="/api/docs", title_spec="My application", version_spec="0.0.1")
+    oas.setup(app, url_prefix="/api/docs", title_spec="Book Web Service", version_spec=AppConfig.VERSION)
     web.run_app(app, port=AppConfig.PORT)
 
 
