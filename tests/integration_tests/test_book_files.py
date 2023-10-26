@@ -15,14 +15,14 @@ logging.basicConfig(level=logging.DEBUG)
 class TestBookFiles:
 
     @pytest.mark.asyncio
-    async def test_get_book_file_200(self, aiohttp_client):
+    async def test_get_book_file_200(self, aiohttp_client: AiohttpClient):
         # TODO: add yield fixture with self-clean to add book to s3
         client = await aiohttp_client(create_app())
         resp = await client.get(API_V1_ROOT.format("book_files/0"))
         assert resp.status == 200
 
     @pytest.mark.asyncio
-    async def test_get_book_file_404(self, aiohttp_client):
+    async def test_get_book_file_404(self, aiohttp_client: AiohttpClient):
         client = await aiohttp_client(create_app())
         resp = await client.get(API_V1_ROOT.format("book_files/99"))
         assert resp.status == 404
@@ -31,8 +31,8 @@ class TestBookFiles:
     async def test_post_book_file_201(self, aiohttp_client: AiohttpClient):
         # TODO: add fixture with self-cleaning
         client = await aiohttp_client(create_app())
-        with open("test_data/test_book.txt", 'rb') as f:
-            files = {'file': f}
+        with open("test_data/test_book.txt", 'rb') as file:
+            files = {'file': file}
             resp = await client.post(API_V1_ROOT.format("book_files/6"), data=files)
         assert resp.status == 201
 
@@ -40,7 +40,7 @@ class TestBookFiles:
     async def test_post_book_file_409(self, aiohttp_client: AiohttpClient):
         # TODO: add fixture that add book_file before test func start
         client = await aiohttp_client(create_app())
-        with open("test_data/test_book.txt", 'rb') as f:
-            files = {'file': f}
+        with open("test_data/test_book.txt", 'rb') as file:
+            files = {'file': file}
             resp = await client.post(API_V1_ROOT.format("book_files/6"), data=files)
         assert resp.status == 409

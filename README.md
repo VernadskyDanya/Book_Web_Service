@@ -63,6 +63,7 @@ These instructions will get you a copy of the project up and running on your loc
 - [ ] Write connection with S3 in async way
 - [ ] Add fixtures for integrity tests
 - [ ] CI/CD. Write a pipeline for automated testing and code quality checks
+- [x] CI/CD. Write a pipeline for quality checks (flake8, mypy)
 - [ ] Set up logging in better way
 
 ## Contributing
