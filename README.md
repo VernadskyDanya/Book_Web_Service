@@ -49,6 +49,28 @@ These instructions will get you a copy of the project up and running on your loc
    docker-compose up
    ```
 
+## Endpoints (`/api/docs`):
+
+- Route: `/readiness`  
+Description: This endpoint is used to check the readiness of the API.
+
+
+- Route: GET `/liveness`  
+Description: This endpoint is used to check the liveness of the API.
+
+
+
+- Route: GET | POST `/api/v1/books`  
+Description: This endpoint is used to retrieve and send information about books.
+
+
+- Route: GET `/api/v1/book_files/{id}`  
+Description: This endpoint is used to download files associated with a specific book.
+
+
+- Route: POST `/api/v1/book_files/{id}`  
+Description: This endpoint is used to upload files associated with a specific book.
+
 ## Running the tests (***experimental!***)
    **Tests are not ready yet for running in such a way!**
 
