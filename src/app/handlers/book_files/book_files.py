@@ -1,7 +1,7 @@
 import logging
 from io import BytesIO
 
-from aiohttp import web
+from aiohttp import web, web_request
 from minio import Minio
 from minio.error import S3Error
 
@@ -16,15 +16,15 @@ def check_object_exists(minio_client: Minio, bucket_name: str, object_name: str)
     return True
 
 
-async def handle_upload(request):  # noqa: WPS210
+async def handle_upload(request: web_request.Request) -> web.Response:  # noqa: WPS210
     # TODO: Add checking that book (id) exists in SQL
 
     file_id = request.match_info['id']
     field = await (await request.multipart()).next()
-    filename = field.filename
+    filename = field.filename  # type: ignore[union-attr, arg-type]
     minio_client = request.app["s3"]
     bucket_name = request.app["s3_bucket_name"]
-    data_stream = BytesIO(await field.read())
+    data_stream = BytesIO(await field.read())  # type: ignore[union-attr]
     data_size = data_stream.getbuffer().nbytes
     try:  # noqa: WPS229
         if check_object_exists(minio_client, bucket_name, file_id):
@@ -36,7 +36,7 @@ async def handle_upload(request):  # noqa: WPS210
         return web.Response(text=f'Failed to upload {filename}: {err}')
 
 
-async def handle_download(request):
+async def handle_download(request: web_request.Request) -> web.Response:
     """Get book file from S3 storage."""
     file_id = request.match_info['id']
     if not file_id:
@@ -51,6 +51,6 @@ async def handle_download(request):
     return response
 
 
-def read_file(minio_client, bucket_name, object_name: str):
+def read_file(minio_client: Minio, bucket_name: str, object_name: str) -> bytes:
     data = minio_client.get_object(bucket_name, object_name)
     return data.read()

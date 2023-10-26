@@ -4,7 +4,8 @@ from aiohttp.hdrs import METH_POST as POST
 
 from app.handlers.book_files import book_files
 from app.handlers.books.books import BookView
-from app.handlers.default.methods import liveness, ReadinessView
+from app.handlers.default.methods import ReadinessView, liveness
+
 
 API_V1_ROOT = "/api/v1/{}"  # noqa: P103
 
