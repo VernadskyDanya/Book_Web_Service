@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "Book Web Service"
-version = "0.1.0"
+version = "0.1.2"
 description = "API service for providing the user with access to various literary works"
 authors = ["d.vernadskii@gmail.com"]
 
