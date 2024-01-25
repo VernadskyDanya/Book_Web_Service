@@ -24,10 +24,16 @@ class DBMigrator:
         else:
             self.alembic_cfg.set_main_option("script_location", "src/alembic_migrations")
 
-    def start_migrate(self):
+    def start_migrate(self) -> None:
         self._create_database(DbConfig.SERVICE_CONNECTION_SETTINGS["dsn"].replace("+asyncpg", ""))
         command.upgrade(self.alembic_cfg, "head")
         logging.info("Migration has been finished")
+
+    def generate_migration(self, description: str) -> None:
+        """Generate a new migration with autogenerate."""
+        self._create_database(DbConfig.SERVICE_CONNECTION_SETTINGS["dsn"].replace("+asyncpg", ""))
+        command.revision(self.alembic_cfg, autogenerate=True, message=description, head="head")
+        logging.info("Generating migration has been finished")
 
     @staticmethod
     def _find_path(root_dir: str, target_name: str, is_file=True) -> str:

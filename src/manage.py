@@ -27,5 +27,11 @@ def migrate() -> None:
     DBMigrator().start_migrate()
 
 
+@cli.command(short_help="generate migration")
+@click.option("--description", "-d", help="Description for the migration")
+def generate_migration(description: str) -> None:
+    DBMigrator().generate_migration(description)
+
+
 if __name__ == "__main__":
     cli()

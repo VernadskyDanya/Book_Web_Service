@@ -8,7 +8,7 @@ from pydantic import BaseModel
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Book as BookSQL
+from app.db.models import Books as BookSQL
 
 
 # Use pydantic BaseModel to validate request body
@@ -102,6 +102,6 @@ class BookView(PydanticView):
             session.add(book_instance)
             await session.commit()
             await session.refresh(book_instance)
-            book_id = book_instance.id
+            book_id = book_instance.book_id
 
         return web.json_response({"message": f"Book with ID {book_id} has been created"}, status=201)
