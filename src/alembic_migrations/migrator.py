@@ -59,6 +59,20 @@ class DBMigrator:
         raise NoPathFound(f"There is no {target_name} inside of {root_dir}")
 
     @staticmethod
+    def find_src_directory(target_directory: str, starting_directory=os.getcwd()) -> str:
+        """Find the absolute path to the 'target_directory' directory in the parent hierarchy."""
+        current_directory = os.path.abspath(starting_directory)
+
+        while os.path.basename(current_directory) != target_directory:
+            parent_directory = os.path.dirname(current_directory)  # Move up to the parent directory
+            # If moving up has no effect, the target directory is not found
+            if parent_directory == current_directory:
+                raise FileNotFoundError(f"Directory '{target_directory}' not found in the path hierarchy.")
+            current_directory = parent_directory  # Update current directory to the parent directory
+
+        return current_directory
+
+    @staticmethod
     def _create_database(url: str):
         """Create target database if it doesn't exist, otherwise do nothing."""
         if not database_exists(url):

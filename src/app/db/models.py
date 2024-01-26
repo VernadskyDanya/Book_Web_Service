@@ -6,7 +6,7 @@ class Base(DeclarativeBase):
     """Base class for ORM."""
 
 
-class Books(Base):
+class Book(Base):
     __tablename__ = "Books"
     book_id = Column(Integer, primary_key=True)
     title = Column(String(30))
@@ -14,7 +14,7 @@ class Books(Base):
     published_date = Column(Date())
 
     # Define the relationship to the BookFiles table
-    files = relationship("BookFiles", back_populates="book", cascade="all, delete-orphan")
+    files = relationship("BookFile", back_populates="book", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         fields = tuple("{k}={v}".format(k=k, v=v) for k, v in self.__dict__.items())  # noqa: WPS221, WPS111
@@ -27,13 +27,13 @@ class BookGenreAssociation(Base):
     genre_id = Column(Integer, ForeignKey("Genres.genre_id"), primary_key=True)
 
 
-class Genres(Base):
+class Genre(Base):
     __tablename__ = "Genres"
     genre_id = Column(Integer, primary_key=True)
     genre_name = Column(String(50))
 
 
-class BookFiles(Base):
+class BookFile(Base):
     __tablename__ = "BookFiles"
     file_id = Column(Integer, primary_key=True)
     book_id = Column(Integer, ForeignKey("Books.book_id"))
@@ -41,4 +41,4 @@ class BookFiles(Base):
     file_format = Column(String(20))
 
     # Define the relationship to the Books table
-    book = relationship("Books", back_populates="files", cascade="all, delete-orphan")
+    book = relationship("Book", back_populates="files")
