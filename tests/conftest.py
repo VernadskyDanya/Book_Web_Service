@@ -1,13 +1,16 @@
 import os
+import typing
 import uuid
 from unittest.mock import patch
-from unittest.mock import MagicMock
 
 import pytest
+import pytest_asyncio
 from sqlalchemy_utils import drop_database
 
 from alembic_migrations.migrator import DBMigrator
 from app.settings.db import DbConfig
+
+from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
 os.environ["HOST_ENV"] = "localhost"
 os.environ["PORT_ENV"] = "8080"
@@ -37,7 +40,7 @@ def alembic_ini_folder() -> str:
 
 
 @pytest.fixture
-def tmp_database(tmp_db_url: str, alembic_ini_folder: str) -> str:
+def tmp_database_url(tmp_db_url: str, alembic_ini_folder: str) -> str:
     try:
         with patch('os.getcwd', return_value=alembic_ini_folder):
             with patch('src.alembic_migrations.migrator.DbConfig.SERVICE_CONNECTION_SETTINGS', new={"dsn": tmp_db_url}):
@@ -47,3 +50,15 @@ def tmp_database(tmp_db_url: str, alembic_ini_folder: str) -> str:
         yield tmp_db_url
     finally:
         drop_database(tmp_db_url.replace("+asyncpg", ""))
+
+
+@pytest_asyncio.fixture
+async def tmp_database_engine(tmp_database_url: str) -> typing.AsyncGenerator[AsyncEngine, None]:
+    engine = create_async_engine(
+        tmp_database_url,
+        pool_size=10,
+        max_overflow=5,
+        echo=True,
+    )
+    yield engine
+    await engine.dispose()

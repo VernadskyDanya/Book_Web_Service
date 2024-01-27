@@ -1,44 +1,60 @@
-from sqlalchemy import Column, Integer, String, Date, ForeignKey
-from sqlalchemy.orm import DeclarativeBase, relationship
+import typing
+
+from sqlalchemy import Column, Integer, String, Date, ForeignKey, Table
+from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
 
 
 class Base(DeclarativeBase):
     """Base class for ORM."""
 
 
-class Book(Base):
-    __tablename__ = "Books"
-    book_id = Column(Integer, primary_key=True)
-    title = Column(String(30))
-    author = Column(String(30))
-    published_date = Column(Date())
+association_book_genre = Table(
+    'book_genre',
+    Base.metadata,
+    Column('book_id', Integer, ForeignKey('book.book_id')),
+    Column('genre_id', Integer, ForeignKey('genre.genre_id'))
+)
 
-    # Define the relationship to the BookFiles table
-    files = relationship("BookFile", back_populates="book", cascade="all, delete-orphan")
+
+class Book(Base):
+    __tablename__ = "book"
+    book_id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(30))
+    author: Mapped[str] = mapped_column(String(30))
+    published_date: Mapped[Date] = mapped_column(Date())
+
+    # Define the many-to-many relationship to "genre" through "book_genre"
+    genres: Mapped[typing.List["Genre"]] = relationship(secondary=association_book_genre, backref="books")
+
+    # Define the relationship to the BookFile table
+    files: Mapped[typing.List["BookFile"]] = relationship(back_populates="book", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         fields = tuple("{k}={v}".format(k=k, v=v) for k, v in self.__dict__.items())  # noqa: WPS221, WPS111
         return str(tuple(sorted(fields))).replace("\'", "")
 
 
-class BookGenreAssociation(Base):
-    __tablename__ = "BookGenres"
-    book_id = Column(Integer, ForeignKey("Books.book_id"), primary_key=True)
-    genre_id = Column(Integer, ForeignKey("Genres.genre_id"), primary_key=True)
-
-
 class Genre(Base):
-    __tablename__ = "Genres"
-    genre_id = Column(Integer, primary_key=True)
-    genre_name = Column(String(50))
+    __tablename__ = "genre"
+    genre_id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    genre_name: Mapped[str] = mapped_column(String(50))
+
+    def __repr__(self) -> str:
+        return f"Genre(genre_id={self.genre_id!r}, genre_name={self.genre_name!r})"
 
 
 class BookFile(Base):
-    __tablename__ = "BookFiles"
-    file_id = Column(Integer, primary_key=True)
-    book_id = Column(Integer, ForeignKey("Books.book_id"))
-    file_size = Column(Integer)
-    file_format = Column(String(20))
+    __tablename__ = "book_file"
+    file_id: Mapped[int] = mapped_column(primary_key=True)
+    book_id: Mapped[int] = mapped_column(ForeignKey("book.book_id"))
+    file_size: Mapped[int] = mapped_column()
+    file_format: Mapped[str] = mapped_column(String(20))
 
     # Define the relationship to the Books table
-    book = relationship("Book", back_populates="files")
+    book: Mapped["Book"] = relationship("Book", back_populates="files")
+
+    def __repr__(self) -> str:
+        return (
+            f"BookFile(file_id={self.file_id!r}, book_id={self.book_id!r}, "
+            f"file_size={self.file_size!r}, file_format={self.file_format!r})"
+        )
