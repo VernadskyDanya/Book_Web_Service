@@ -1,7 +1,5 @@
-import typing
-
-from sqlalchemy import Column, Integer, String, Date, ForeignKey, Table
-from sqlalchemy.orm import DeclarativeBase, relationship, Mapped, mapped_column
+from sqlalchemy import Column, Date, ForeignKey, Integer, String, Table
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
 class Base(DeclarativeBase):
@@ -12,7 +10,7 @@ association_book_genre = Table(
     'book_genre',
     Base.metadata,
     Column('book_id', Integer, ForeignKey('book.book_id')),
-    Column('genre_id', Integer, ForeignKey('genre.genre_id'))
+    Column('genre_id', Integer, ForeignKey('genre.genre_id')),
 )
 
 
@@ -24,10 +22,10 @@ class Book(Base):
     published_date: Mapped[Date] = mapped_column(Date())
 
     # Define the many-to-many relationship to "genre" through "book_genre"
-    genres: Mapped[typing.List["Genre"]] = relationship(secondary=association_book_genre, backref="books")
+    genres: Mapped[list["Genre"]] = relationship(secondary=association_book_genre, lazy="select", backref="books")
 
     # Define the relationship to the BookFile table
-    files: Mapped[typing.List["BookFile"]] = relationship(back_populates="book", cascade="all, delete-orphan")
+    files: Mapped[list["BookFile"]] = relationship(back_populates="book", cascade="all, delete-orphan")
 
     def __repr__(self) -> str:
         fields = tuple("{k}={v}".format(k=k, v=v) for k, v in self.__dict__.items())  # noqa: WPS221, WPS111
@@ -51,10 +49,10 @@ class BookFile(Base):
     file_format: Mapped[str] = mapped_column(String(20))
 
     # Define the relationship to the Books table
-    book: Mapped["Book"] = relationship("Book", back_populates="files")
+    book: Mapped["Book"] = relationship(back_populates="files")
 
     def __repr__(self) -> str:
         return (
-            f"BookFile(file_id={self.file_id!r}, book_id={self.book_id!r}, "
+            f"BookFile(file_id={self.file_id!r}, book_id={self.book_id!r}, " +
             f"file_size={self.file_size!r}, file_format={self.file_format!r})"
         )

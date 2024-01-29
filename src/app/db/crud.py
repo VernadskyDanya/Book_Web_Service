@@ -5,10 +5,9 @@ from sqlalchemy.sql import text
 
 
 async def check_database_connection(engine: AsyncEngine) -> bool:
-    """
-        Check the connection to the database using the provided AsyncEngine.
+    """Check the connection to the database using the provided AsyncEngine.
 
-        Returns:
+    Returns:
         - bool: True if the connection is successful, False otherwise.
     """
     try:

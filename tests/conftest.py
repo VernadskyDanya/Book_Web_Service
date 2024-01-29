@@ -1,16 +1,15 @@
 import os
-import typing
 import uuid
 from unittest.mock import patch
 
 import pytest
 import pytest_asyncio
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 from sqlalchemy_utils import drop_database
 
 from alembic_migrations.migrator import DBMigrator
 from app.settings.db import DbConfig
 
-from sqlalchemy.ext.asyncio import create_async_engine, AsyncEngine
 
 os.environ["HOST_ENV"] = "localhost"
 os.environ["PORT_ENV"] = "8080"
@@ -53,12 +52,14 @@ def tmp_database_url(tmp_db_url: str, alembic_ini_folder: str) -> str:
 
 
 @pytest_asyncio.fixture
-async def tmp_database_engine(tmp_database_url: str) -> typing.AsyncGenerator[AsyncEngine, None]:
+async def tmp_database_engine(tmp_database_url: str) -> AsyncEngine:
     engine = create_async_engine(
         tmp_database_url,
         pool_size=10,
         max_overflow=5,
         echo=True,
     )
-    yield engine
-    await engine.dispose()
+    try:
+        yield engine
+    finally:
+        await engine.dispose()
