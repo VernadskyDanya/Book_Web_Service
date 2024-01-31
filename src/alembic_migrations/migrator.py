@@ -24,10 +24,16 @@ class DBMigrator:
         else:
             self.alembic_cfg.set_main_option("script_location", "src/alembic_migrations")
 
-    def start_migrate(self):
+    def start_migrate(self) -> None:
         self._create_database(DbConfig.SERVICE_CONNECTION_SETTINGS["dsn"].replace("+asyncpg", ""))
         command.upgrade(self.alembic_cfg, "head")
         logging.info("Migration has been finished")
+
+    def generate_migration(self, description: str) -> None:
+        """Generate a new migration with autogenerate."""
+        self._create_database(DbConfig.SERVICE_CONNECTION_SETTINGS["dsn"].replace("+asyncpg", ""))
+        command.revision(self.alembic_cfg, autogenerate=True, message=description, head="head")
+        logging.info("Generating migration has been finished")
 
     @staticmethod
     def _find_path(root_dir: str, target_name: str, is_file=True) -> str:
@@ -51,6 +57,20 @@ class DBMigrator:
                 return os.path.join(root, target_name)
 
         raise NoPathFound(f"There is no {target_name} inside of {root_dir}")
+
+    @staticmethod
+    def find_src_directory(target_directory: str, starting_directory=os.getcwd()) -> str:
+        """Find the absolute path to the 'target_directory' directory in the parent hierarchy."""
+        current_directory = os.path.abspath(starting_directory)
+
+        while os.path.basename(current_directory) != target_directory:
+            parent_directory = os.path.dirname(current_directory)  # Move up to the parent directory
+            # If moving up has no effect, the target directory is not found
+            if parent_directory == current_directory:
+                raise FileNotFoundError(f"Directory '{target_directory}' not found in the path hierarchy.")
+            current_directory = parent_directory  # Update current directory to the parent directory
+
+        return current_directory
 
     @staticmethod
     def _create_database(url: str):

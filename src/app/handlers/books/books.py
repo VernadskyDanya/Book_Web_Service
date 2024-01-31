@@ -1,85 +1,68 @@
-import typing
+import json
 
 from aiohttp import web
-from aiohttp_pydantic import PydanticView
-from aiohttp_pydantic.oas.typing import r200, r201, r404
-from multidict import MultiDict
-from pydantic import BaseModel
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
+from aiohttp_pydantic.oas.typing import r201
+from pydantic import ValidationError
+from sqlalchemy import Select, select
+from sqlalchemy.ext.asyncio import async_sessionmaker
+from sqlalchemy.orm import selectinload
 
-from app.db.models import Book as BookSQL
-
-
-# Use pydantic BaseModel to validate request body
-class Book(BaseModel):
-    id: int | None = None
-    name: str
-    author: str
-    date_published: str  # TODO: change to date type or add validation
-    genre: str | None = None
-
-    class Config:
-        from_attributes = True
+from app.db.models import Book as BookORM
+from app.db.models import Genre as GenreORM
+from app.handlers.models import Book
 
 
-class Error(BaseModel):
-    error: str
-
-
-class BookKeyError(Exception):
-    """Error for keys that are not valid."""
-
-
-def _build_conditions(**kwargs: typing.Any) -> list:
+def _build_conditions(book: Book) -> Select[tuple[BookORM]]:
     """Build SQL conditions for a query."""
-    conditions = []
-    for key, value in kwargs.items():
-        if value is not None:
-            conditions.append(getattr(BookSQL, key) == value)
-    return conditions
+    # Build the base query
+    query = select(BookORM).options(selectinload(BookORM.files), selectinload(BookORM.genres))  # noqa: WPS221
+
+    if book.book_id:
+        query = query.where(BookORM.book_id == book.id)
+    if book.title:
+        query = query.where(BookORM.title == book.title)
+    if book.author:
+        query = query.where(BookORM.author == book.author)
+    if book.published_date:
+        query = query.where(BookORM.published_date == book.published_date)
+    if book.genres:
+        query = query.where(BookORM.genres.any(GenreORM.genre_name.in_(book.genres)))  # noqa: WPS221
+
+    return query
 
 
-def _validate_fields(parameters: dict | MultiDict[str], valid_values: tuple) -> None:
-    for key in parameters.keys():
-        if key not in valid_values:
-            raise BookKeyError(f"{key}")
+class BookView(web.View):
 
-
-class BookView(PydanticView):
-
-    async def get(  # noqa: WPS211 (needed for support swagger)
-            self,
-            id: int | None = None,  # noqa: WPS125
-            name: str | None = None,
-            author: str | None = None,
-            date_published: str | None = None,
-            genre: str | None = None,
-    ) -> r200[list[Book]] | r404[Error]:
+    async def get(self, content_type='application/json'):
         """
         Find books.
 
         Tags: book
         Status Codes:
             200: Successful operation
+            400: Model validation error
             404: Book not found
         """
         try:
-            _validate_fields(self.request.rel_url.query, tuple(Book.__annotations__.keys()))
-        except BookKeyError as key:
-            return web.json_response(
-                Error(error="Invalid query parameter key '{key}'".format(key=str(key))).model_dump_json(),
-                status=400,
-            )
+            pydantic_book = Book(**self.request.query)
+        except ValidationError as e:
+            error_message = {"error": "Validation error", "detail": str(e)}
+            return web.Response(text=json.dumps(error_message), content_type=content_type, status=400)
 
-        conditions = _build_conditions(id=id, name=name, author=author, date_published=date_published, genre=genre)
+        db_query = _build_conditions(pydantic_book)  # Build the database query
 
-        async with AsyncSession(self.request.app["db"]) as session:
-            stmt = select(BookSQL).where(*conditions)
-            retrieved_books = (await session.execute(stmt)).scalars().all()
-            if not retrieved_books:
-                return web.json_response({"error": "Books not found"}, status=404)
-        return web.json_response([Book.model_validate(book.__dict__).model_dump_json() for book in retrieved_books])
+        async_session = async_sessionmaker(self.request.app["db"], expire_on_commit=False)
+        async with async_session() as session:
+            async with session.begin():
+                result = await session.execute(db_query)
+                retrieved_books = result.fetchall()
+
+        if not retrieved_books:
+            return web.Response(text=json.dumps({"error": "No books found"}), content_type=content_type, status=404)
+
+        pydantic_books = [Book.model_validate(book[0]) for book in retrieved_books]
+        data = [model.model_dump_json() for model in pydantic_books]
+        return web.Response(text=json.dumps(data), content_type=content_type)
 
     async def post(self, book: Book) -> r201:
         """
@@ -102,6 +85,6 @@ class BookView(PydanticView):
             session.add(book_instance)
             await session.commit()
             await session.refresh(book_instance)
-            book_id = book_instance.id
+            book_id = book_instance.book_id
 
         return web.json_response({"message": f"Book with ID {book_id} has been created"}, status=201)
