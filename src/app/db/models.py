@@ -17,12 +17,14 @@ association_book_genre = Table(
 class Book(Base):
     __tablename__ = "book"
     book_id: Mapped[int] = mapped_column(primary_key=True)
-    title: Mapped[str] = mapped_column(String(30))
+    title: Mapped[str] = mapped_column(String(100))
     author: Mapped[str] = mapped_column(String(30))
     published_date: Mapped[Date] = mapped_column(Date())
 
     # Define the many-to-many relationship to "genre" through "book_genre"
-    genres: Mapped[list["Genre"]] = relationship(secondary=association_book_genre, lazy="select", backref="books")
+    genres: Mapped[list["Genre"]] = relationship(
+        secondary=association_book_genre, lazy="select", backref="books", cascade="all",
+    )
 
     # Define the relationship to the BookFile table
     files: Mapped[list["BookFile"]] = relationship(back_populates="book", cascade="all, delete-orphan")
