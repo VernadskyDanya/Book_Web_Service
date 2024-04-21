@@ -1,8 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  name: minio-deployment
+  name: minio-statefulset
 spec:
+  serviceName: minio
   replicas: 1
   selector:
     matchLabels:
@@ -13,24 +14,23 @@ spec:
         app: minio
     spec:
       containers:
-      - name: minio-container
+      - name: minio
         image: minio/minio:latest
         ports:
         - containerPort: 9000
         env:
         - name: MINIO_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: minio-secret
-              key: minio_access_key
+          value: ACCESS_KEY
         - name: MINIO_SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: minio-secret
-              key: minio_secret_key
+          value: SECRET_KEY
         volumeMounts:
-        - name: minio-volume
+        - name: minio-storage
           mountPath: /data
-      volumes:
-      - name: minio-volume
-        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: minio-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 1Gi
