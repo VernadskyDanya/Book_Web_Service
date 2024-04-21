@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: my-app
+  template:
+    metadata:
+      labels:
+        app: my-app
+    spec:
+      containers:
+      - name: my-app-container
+        image: my-app-image
+        ports:
+        - containerPort: 8080
+        env:
+        - name: DB_HOST
+          value: "db"
+        - name: S3_HOST
+          value: "minio"
+        volumeMounts:
+        - name: app-volume
+          mountPath: /opt/app
+      volumes:
+      - name: app-volume
+        emptyDir: {}
